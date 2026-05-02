@@ -2475,6 +2475,15 @@ pub enum AIAgentInput {
         suggestion: PassiveSuggestionResultType,
         context: Arc<[AIAgentContext]>,
     },
+
+    /// Piggybacked orchestration config update from the plan card.
+    /// Sent on the next outbound request after the user edits the
+    /// config block or toggles approval.
+    OrchestrationConfigUpdate {
+        plan_id: String,
+        config: ai::agent::orchestration_config::OrchestrationConfig,
+        status: ai::agent::orchestration_config::OrchestrationConfigStatus,
+    },
 }
 
 /// Data for a single message received by an agent from another agent.
@@ -2568,6 +2577,7 @@ impl Display for AIAgentInput {
                 write!(f, "EventsFromAgents({} events)", events.len())
             }
             Self::PassiveSuggestionResult { .. } => write!(f, "PassiveSuggestionResult"),
+            Self::OrchestrationConfigUpdate { .. } => write!(f, "OrchestrationConfigUpdate"),
         }
     }
 }
@@ -2631,7 +2641,7 @@ impl AIAgentInput {
             | Self::StartFromAmbientRunPrompt { .. }
             | Self::MessagesReceivedFromAgents { .. }
             | Self::EventsFromAgents { .. }
-            | Self::PassiveSuggestionResult { .. } => None,
+            | Self::PassiveSuggestionResult { .. } | Self::OrchestrationConfigUpdate { .. } => None,
         }
     }
 
@@ -2728,7 +2738,8 @@ impl AIAgentInput {
             | Self::PassiveSuggestionResult { context, .. } => Some(context),
             Self::SummarizeConversation { .. }
             | Self::MessagesReceivedFromAgents { .. }
-            | Self::EventsFromAgents { .. } => None,
+            | Self::EventsFromAgents { .. }
+            | Self::OrchestrationConfigUpdate { .. } => None,
         }
     }
 
@@ -2759,7 +2770,8 @@ impl AIAgentInput {
             | Self::StartFromAmbientRunPrompt { .. }
             | Self::MessagesReceivedFromAgents { .. }
             | Self::EventsFromAgents { .. }
-            | Self::PassiveSuggestionResult { .. } => None,
+            | Self::PassiveSuggestionResult { .. }
+            | Self::OrchestrationConfigUpdate { .. } => None,
         }
     }
 
